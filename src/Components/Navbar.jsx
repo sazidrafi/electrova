@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, Button } from "@heroui/react";
 import logo from "../../public/images/Logo.png";
 import Image from "next/image";
+import { Magnifier, Person, ShoppingCart } from "@gravity-ui/icons";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -41,15 +42,38 @@ export default function Navbar() {
             </svg>
           </button>
           <Link href="/">
-            <Image src={logo} alt="Navbar Logo" width={150} height={80} />
+            <Image
+              src={logo}
+              alt="Navbar Logo"
+              width={150}
+              height={80}
+            />
           </Link>
         </div>
         <ul className="hidden items-center gap-4 md:flex">
           <li>
-            <Link href="/dashboard">Dashboard</Link>
+            <Link href="/">Home</Link>
           </li>
           <li>
-            <Link href="#">Pricing</Link>
+            <Link href="/products">Products</Link>
+          </li>
+        </ul>
+
+        <ul className="items-center gap-4 flex">
+          <li>
+            <Link href="#">
+              <Magnifier />
+            </Link>
+          </li>
+          <li>
+            <Link href="#">
+              <Person />
+            </Link>
+          </li>
+          <li>
+            <Link href="#">
+              <ShoppingCart />
+            </Link>
           </li>
         </ul>
       </header>
@@ -58,12 +82,12 @@ export default function Navbar() {
           <ul className="flex flex-col gap-2 p-4">
             <li>
               <Link href="#" className="block py-2">
-                Features
+                Home
               </Link>
             </li>
             <li>
-              <Link href="#" className="block py-2">
-                Pricing
+              <Link href="/products" className="block py-2">
+                Products
               </Link>
             </li>
           </ul>
