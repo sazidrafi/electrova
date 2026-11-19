@@ -1,3 +1,4 @@
+import { ThemeSwitch } from "@/Components/ThemeSwitch";
 import Image from "next/image";
 
 export default function Home() {
@@ -62,6 +63,8 @@ export default function Home() {
           >
             Documentation
           </a>
+
+          {/* <ThemeSwitch/> */}
         </div>
       </main>
     </div>
