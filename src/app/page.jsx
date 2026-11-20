@@ -12,9 +12,8 @@ import {
 import FeaturedProduct from "@/Components/FeaturedProduct";
 import HeroSlider from "@/Components/HeroSlider";
 import ProductCard from "@/Components/ProductCard";
-import { ThemeSwitch } from "@/Components/ThemeSwitch";
-import Image from "next/image";
 import Link from "next/link";
+import HomeProductCard from "@/Components/HomeProductCard";
 
 export default function Home() {
   const onSubmit = (e) => {
@@ -139,7 +138,7 @@ export default function Home() {
 
         <div className="products grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-9 mt-7 mb-10">
           {products.map((item) => (
-            <ProductCard key={item.id} item={item} />
+            <HomeProductCard key={item.id} item={item} />
           ))}
         </div>
 
