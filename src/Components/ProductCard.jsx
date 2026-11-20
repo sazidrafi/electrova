@@ -1,13 +1,43 @@
+'use client'
 import { CircleDollar } from "@gravity-ui/icons";
 import { Avatar, Button, Card, CloseButton, Link } from "@heroui/react";
+import { redirect } from "next/navigation";
 
 const ProductCard = ({ item }) => {
-  const { id, title, description, ratings, price, image } = item;
+  const {
+    _id,
+  title,
+  slug,
+  description,
+  ratings,
+  currentPrice,
+  discountedPrice,
+  brandId,
+  color,
+  isFeatured,
+  specs: {
+    connectivity,
+    noiseCancellation,
+    batteryLife,
+    waterResistance,
+  },
+  inStock,
+  stockCount,
+  categoryId,
+  images,
+  status,
+  createdAt,
+  updatedAt,
+  warrantyMonth,
+} = item;
+  const handleClick = () => {
+redirect(`/products/${_id}`)
+  }
   return (
-    <Card>
+    <Card onClick={handleClick} className="cursor-pointer ">
       <Card.Header>
-        <Avatar className="size-50 w-full rounded-xl">
-          <Avatar.Image alt="Demo 1" src={image} />
+        <Avatar className="size-50 w-full rounded-xl hover:scale-103 duration-500 ">
+          <Avatar.Image alt="Demo 1" src={images[0]} />
           <Avatar.Fallback>{title.slice(0, 21)}</Avatar.Fallback>
         </Avatar>
       </Card.Header>
@@ -19,7 +49,7 @@ const ProductCard = ({ item }) => {
         <div className="flex justify-between p-1">
           <p className="flex text-lg font-semibold items-center gap-1">
             <CircleDollar className="w-6 h-6"/>
-            {price}
+            {currentPrice}
           </p>
           <Button variant="outline">Buy Now</Button>
         </div>
