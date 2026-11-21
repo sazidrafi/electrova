@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import Navbar from "../Components/Navbar";
 import Footer from "@/Components/Footer";
+import { Toast } from "@heroui/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
           <main>{children}</main>
           <Footer/>
         </Providers>
+        <Toast.Provider placement="top" />
       </body>
     </html>
   );
