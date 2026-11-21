@@ -9,29 +9,47 @@ import {
   Form,
   Input,
   Label,
-  TextArea,
   TextField,
 } from "@heroui/react";
-import { Check } from "@gravity-ui/icons";
+
 import { toast } from "@heroui/react";
 import { FaGoogle } from "react-icons/fa";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { signUp } from "../lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const SignUpPage = () => {
-  const onSubmit = (e) => {
+  const router = useRouter()
+  const onSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = {};
-    // Convert FormData to plain object
-    formData.forEach((value, key) => {
-      data[key] = value.toString();
-    });
-    console.log('Signup data ',data);
-    toast.success("Success!", {
-      description: "Your account has been created successfully.",
-    });
-    redirect("/")
+
+    const { name, email, password } = Object.fromEntries(formData.entries());
+
+    try {
+      const { data, error } = await signUp.email({
+        email,
+        password,
+        name,
+      });
+      if (error) {
+        toast.danger("Signup Failed!", {
+          description: error.message,
+        });
+        return;
+      }
+
+      // console.log("Signup data:", data);
+
+      toast.success("Success!", {
+        description: "Your account has been created successfully.",
+      });
+      router.push("/")
+    } catch (error) {
+      toast.danger("Something went wrong!", {
+        description: error.message || "Please try again.",
+      });
+    }
   };
   return (
     <div className="container mx-auto m-10 min-h-120">
@@ -103,9 +121,11 @@ const SignUpPage = () => {
                   </Description>
                   <FieldError />
                 </TextField>
-                <div className = "flex gap-1">
+                <div className="flex gap-1">
                   <p>Already have an account ?</p>
-                <Link href="/signin" className="text-blue-400 font-semibold">Sing In</Link>
+                  <Link href="/signin" className="text-blue-400 font-semibold">
+                    Sing In
+                  </Link>
                 </div>
               </FieldGroup>
               <Fieldset.Actions>

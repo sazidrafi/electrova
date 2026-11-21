@@ -16,22 +16,40 @@ import { Check } from "@gravity-ui/icons";
 import { toast } from "@heroui/react";
 import { FaGoogle } from "react-icons/fa";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { signIn } from "../lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const SignInPage = () => {
-  const onSubmit = (e) => {
+  const router = useRouter();
+  const onSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = {};
-    // Convert FormData to plain object
-    formData.forEach((value, key) => {
-      data[key] = value.toString();
-    });
-    console.log('Sign in ',data);
-    toast.success("Success!", {
-      description: "Log in successful",
-    });
-    redirect("/");
+
+    const { email, password } = Object.fromEntries(formData.entries());
+
+    try {
+      const { data, error } = await signIn.email({
+        email,
+        password,
+      });
+      if (error) {
+        toast.danger("Signin Failed!", {
+          description: error.message,
+        });
+        return;
+      }
+
+      // console.log("Signin data:", data);
+
+      toast.success("Success!", {
+        description: `Welcome Back`,
+      });
+      router.push("/");
+    } catch (error) {
+      toast.danger("Something went wrong!", {
+        description: error.message || "Please try again.",
+      });
+    }
   };
   return (
     <div className="container mx-auto m-10 min-h-120">
@@ -76,7 +94,7 @@ const SignInPage = () => {
                 <div className="flex gap-1">
                   <p>Don&apos;t have an account ?</p>
                   <Link href="/signup" className="text-blue-400 font-semibold">
-                    Sing Up
+                    Sign Up
                   </Link>
                 </div>
               </FieldGroup>
