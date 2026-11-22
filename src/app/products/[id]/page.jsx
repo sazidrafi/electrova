@@ -10,7 +10,7 @@ const ProductDetailsPage = async ({ params }) => {
   );
   const data = await res.json();
   const product = data[0];
-  console.log(product);
+  // console.log(product);
 
   return (
     <div className="container mx-auto m-5 mb-15">

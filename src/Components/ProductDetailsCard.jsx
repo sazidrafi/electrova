@@ -1,10 +1,34 @@
+"use client";
+import { authClient } from "@/app/lib/auth-client";
 import { CircleDollar, StarFill } from "@gravity-ui/icons";
 import { Button, Chip } from "@heroui/react";
-
 import Image from "next/image";
-import { ThemeSwitch } from "./ThemeSwitch";
+import Link from "next/link";
 
 const ProductDetailsCard = ({ product }) => {
+  const { data, isPending, error, refetch } = authClient?.useSession();
+  let userId;
+  { data?.user?.id ? userId = data?.user?.id : '' }
+  const handleAddToCart = async () => {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/products/cart`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId,
+          productId: _id,
+          quantity: 1,
+        }),
+      },
+    );
+
+    // const data = await res.json();
+    // console.log(data);
+  };
+
   const {
     _id,
     title,
@@ -90,12 +114,17 @@ const ProductDetailsCard = ({ product }) => {
           </div>
           <div className="border border-gray-300 mb-5"></div>
           <div className="buttons flex justify-between gap-3">
-            <Button className="text-xl text-black  md:pl-20 md:pr-20 xl:pl-35 xl:pr-35 pb-5 pt-5 xl:pb-7 xl:pt-7 bg-gray-300">
+            <Button
+              onClick={handleAddToCart}
+              className="text-xl text-black  md:pl-20 md:pr-20 xl:pl-35 xl:pr-35 pb-5 pt-5 xl:pb-7 xl:pt-7 bg-gray-300"
+            >
               Add to cart
             </Button>
-            <Button className="bg-green-800 text-xl md:pl-20 md:pr-20 pb-5 pt-5 xl:pl-35 xl:pr-35 xl:pb-7 xl:pt-7">
-              Buy Now
-            </Button>
+            <Link href="/checkout">
+              <Button className="bg-green-800 text-xl md:pl-20 md:pr-20 pb-5 pt-5 xl:pl-35 xl:pr-35 xl:pb-7 xl:pt-7">
+                Buy Now
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
