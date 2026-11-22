@@ -9,7 +9,7 @@ import { authClient } from "@/app/lib/auth-client";
 
 export default function Navbar() {
   const { data, isPending, error, refetch } = authClient?.useSession();
-  console.log("Session data ", data?.user);
+  // console.log("Session data ", data?.user);
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const handleCart = () => {

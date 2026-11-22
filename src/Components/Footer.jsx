@@ -18,7 +18,7 @@ export default function Footer() {
 
   return (
     <footer className="relative border-t border-gray-200 bg-white dark:bg-gray-700 dark:text-white text-gray-800 py-14 px-6">
-      <div className="max-w-full px-7 mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="max-w-full px-7 mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-10">
         
         {/* Column 1: Brand / About */}
         <div className="space-y-4">
