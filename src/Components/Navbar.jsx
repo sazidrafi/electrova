@@ -1,15 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Button, Spinner } from "@heroui/react";
 import logo from "../../public/images/Logo.png";
 import Image from "next/image";
 import { Magnifier, Person, ShoppingCart } from "@gravity-ui/icons";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { authClient } from "@/app/lib/auth-client";
+import CartItems from "./CartItems";
 
 export default function Navbar() {
-  const { data, isPending, error, refetch } = authClient?.useSession();
-  // console.log("Session data ", data?.user);
+  const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const { data, isPending, error, refetch } = authClient.useSession();
+  // console.log("Session data ", data?.user?.id);
+  const userId = data?.user?.id;
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const handleCart = () => {
@@ -17,6 +22,31 @@ export default function Navbar() {
   };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/cart`);
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch cart");
+        }
+
+        const data = await res.json();
+        setCart(data);
+        // console.log(cart);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, [isCartOpen]);
+
+  if (loading) {
+    return <p className="p-5">Loading cart...</p>;
+  }
   return (
     <>
       <nav className="sticky top-0 z-40 w-full border-b border-separator bg-background/70 backdrop-blur-lg">
@@ -131,7 +161,7 @@ export default function Navbar() {
       </nav>
       <aside
         className={`fixed right-0 top-0 z-50 h-dvh
-  w-full sm:w-100 md:w-105
+  w-full sm:w-100 md:w-150
   bg-white dark:bg-gray-900 shadow-xl
   transition-transform duration-300 ease-in-out
   flex flex-col
@@ -152,15 +182,23 @@ export default function Navbar() {
 
         {/* Cart Content */}
         <div className="flex-1 overflow-y-auto p-5">
-          <p className="text-gray-600 dark:text-gray-300">
-            Your cart is empty!
-          </p>
+          {cart && isCartOpen ? (
+            <CartItems
+              cart={cart}
+              userid={userId}
+              
+            />
+          ) : (
+            <p className="text-gray-600 dark:text-gray-300">
+              Your cart is empty!
+            </p>
+          )}
         </div>
 
         {/* Checkout Section */}
         <div className="shrink-0 border-t border-gray-200 dark:border-gray-700 p-5 bg-white dark:bg-gray-900">
           <Link href="/checkout" className="w-full">
-            <Button className="w-full bg-green-700 hover:bg-green-800 text-white rounded-lg py-6 text-base font-semibold">
+            <Button className="w-full bg-blue-700 hover:bg-green-800 text-white rounded-lg py-6 text-base font-semibold">
               Checkout
             </Button>
           </Link>
