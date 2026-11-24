@@ -325,6 +325,11 @@ const CartPage = () => {
           </div>
         </div>
       </div>
+
+
+
+      {/* User information section */}
+      
     </div>
   );
 };
