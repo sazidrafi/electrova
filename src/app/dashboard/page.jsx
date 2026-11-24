@@ -1,15 +1,26 @@
-
-
+"use client";
 import { ThemeSwitch } from "@/Components/ThemeSwitch";
+import { Button } from "@heroui/react";
+import { authClient } from "../lib/auth-client";
+import { useRouter } from "next/navigation";
 
-const page = () => {
+const DashboardPage = () => {
+  const router = useRouter();
+  const handleLogOut = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/signin"); // redirect to login page
+        },
+      },
+    });
+  };
   return (
-    <div>
-      <h2>Hello from page!</h2>
-          <p>This is a reusable component.</p>
-      <ThemeSwitch/>
+    <div className="container mx-auto m-10 p-5">
+      <h2>This is dashboard page!</h2>
+      <Button onClick={handleLogOut}>Log out</Button>
     </div>
   );
 };
 
-export default page;
+export default DashboardPage;
