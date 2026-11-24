@@ -1,14 +1,16 @@
 "use client";
 import { authClient } from "@/app/lib/auth-client";
 import { CircleDollar, StarFill } from "@gravity-ui/icons";
-import { Button, Chip } from "@heroui/react";
+import { Button, Chip, toast } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
 
 const ProductDetailsCard = ({ product }) => {
   const { data, isPending, error, refetch } = authClient?.useSession();
   let userId;
-  { data?.user?.id ? userId = data?.user?.id : '' }
+  {
+    data?.user?.id ? (userId = data?.user?.id) : "";
+  }
   const handleAddToCart = async () => {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/products/cart`,
@@ -21,10 +23,12 @@ const ProductDetailsCard = ({ product }) => {
           userId: userId,
           productId: _id,
           quantity: 1,
+          productName: title,
+          productPrice: discountedPrice,
         }),
       },
     );
-
+    toast.success("Item added to cart");
     // const data = await res.json();
     // console.log(data);
   };
