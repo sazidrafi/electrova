@@ -1,5 +1,5 @@
 "use client";
-import { ThemeSwitch } from "@/Components/ThemeSwitch";
+
 import { Button } from "@heroui/react";
 import { authClient } from "../lib/auth-client";
 import { useRouter } from "next/navigation";

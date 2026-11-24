@@ -1,16 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Link, Button, Spinner } from "@heroui/react";
+import { Link, Button, Spinner, Dropdown } from "@heroui/react";
 import logo from "../../public/images/Logo.png";
 import Image from "next/image";
 import { Magnifier, Person, ShoppingCart } from "@gravity-ui/icons";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { authClient } from "@/app/lib/auth-client";
 import CartItems from "./CartItems";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const { data, isPending, error, refetch } = authClient.useSession();
   // console.log("Session data ", data?.user?.id);
@@ -47,6 +49,21 @@ export default function Navbar() {
   if (loading) {
     return <p className="p-5">Loading cart...</p>;
   }
+
+  const handleLogOut = async () => {
+    if (!data?.user) {
+      router.push("/signin");
+    } else if (data?.user) {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.push("/signin"); // redirect to login page
+          },
+        },
+      });
+    }
+  };
+
   return (
     <>
       <nav className="sticky top-0 z-40 w-full border-b border-separator bg-background/70 backdrop-blur-lg">
@@ -110,21 +127,52 @@ export default function Navbar() {
               </Link>
             </li>
             <li>
-              <Link href={data?.user ? "/dashboard" : "/signin"}>
-                {isPending ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <Spinner
-                      size="sm"
-                      color="current"
-                      className="animate-[spin_1.5s_linear_infinite] motion-reduce:animate-none"
-                    />
-                  </div>
-                ) : data?.user ? (
-                  <p>Hi, {data?.user.name.slice(0, 3)}</p>
-                ) : (
-                  <Person />
-                )}
-              </Link>
+              {/* <Link href={data?.user ? "/dashboard" : "/signin"}> */}
+
+              <Dropdown>
+                <Button aria-label="Menu" variant="secondary">
+                  {isPending ? (
+                    <Spinner size="sm" color="current" />
+                  ) : data?.user ? (
+                    <p>Hi, {data.user.name.slice(0, 3)}</p>
+                  ) : (
+                    <Person />
+                  )}
+                </Button>
+
+                <Dropdown.Popover>
+                  <Dropdown.Menu
+                    onAction={(key) => {
+                      if (key === "dashboard") {
+                        router.push("/dashboard");
+                      } else if (key === "myorders") {
+                        router.push("/myorders");
+                      } else if (key === "logout") {
+                        handleLogOut();
+                      } else if (key === "signin") {
+                        router.push("/signin");
+                      }
+                    }}
+                  >
+                    <Dropdown.Item id="dashboard" textValue="Profile">
+                      Profile
+                    </Dropdown.Item>
+
+                    <Dropdown.Item id="myorders" textValue="My orders">
+                      My orders
+                    </Dropdown.Item>
+
+                    <Dropdown.Item
+                      id={data?.user ? "logout" : "signin"}
+                      textValue={data?.user ? "Log out" : "Sign In"}
+                      variant={data?.user ? "danger" : "default"}
+                    >
+                      {data?.user ? "Log out" : "Sign In"}
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
+              </Dropdown>
+              {/* </Link> */}
             </li>
             <li>
               <button onClick={handleCart} className="cursor-pointer">
@@ -183,11 +231,7 @@ export default function Navbar() {
         {/* Cart Content */}
         <div className="flex-1 overflow-y-auto p-5">
           {cart && isCartOpen ? (
-            <CartItems
-              cart={cart}
-              userid={userId}
-              
-            />
+            <CartItems cart={cart} userid={userId} />
           ) : (
             <p className="text-gray-600 dark:text-gray-300">
               Your cart is empty!
