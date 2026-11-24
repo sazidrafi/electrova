@@ -1,10 +1,9 @@
-import { TableFooter } from "@heroui/react";
 import { useState, useEffect } from "react";
-
-const CartItems = ({ cart, userid }) => {
-  const { _id, userId, productId, quantity, updatedAt } = cart;
-  //   console.log(userid);
+import { Table } from "@heroui/react";
+const CartItems = ({ userid }) => {
   const [cartItem, setCartItem] = useState([]);
+  const [updatingId, setUpdatingId] = useState(null);
+
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -17,7 +16,6 @@ const CartItems = ({ cart, userid }) => {
         }
 
         const cartItems = await res.json();
-        console.log("Cart item ", cartItems);
         setCartItem(cartItems);
       } catch (error) {
         console.error(error);
@@ -28,56 +26,118 @@ const CartItems = ({ cart, userid }) => {
       fetchCart();
     }
   }, [userid]);
+
+  const handleQuantityChange = async (item, action) => {
+    try {
+      setUpdatingId(item._id);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/cart/${userid}/${item._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action }),
+        },
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to update quantity");
+      }
+      const data = await res.json();
+
+      setCartItem((prev) =>
+        prev.map((cart) =>
+          cart._id === item._id ? { ...cart, quantity: data.quantity } : cart,
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const subtotal = cartItem.reduce(
+    (total, item) => total + Number(item.productPrice) * Number(item.quantity),
+    0,
+  );
+
   return (
     <div className="flex-1 overflow-y-auto pl-3 pr-3">
-      {/* <p className="text-gray-600 dark:text-gray-300">
-        {" "}
-        Here are all cart items
-      </p> */}
-
-      { cartItem.length === 0 && <p>Your cart is empty</p>}
+      {cartItem.length === 0 && <p>Your cart is empty</p>}
 
       {cartItem.length > 0 && (
         <div className="w-full overflow-x-auto mt-5">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b dark:border-gray-700">
-                <th className="p-3">Product Name</th>
-                <th className="p-3 text-center">Quantity</th>
-                <th className="p-3 text-right">Price</th>
-              </tr>
-            </thead>
+          <Table>
+            <Table.ScrollContainer>
+              <Table.Content
+                aria-label="Shopping cart items"
+                className="min-w-120"
+              >
+                <Table.Header>
+                  <Table.Column isRowHeader>Product Name</Table.Column>
+                  <Table.Column>Quantity</Table.Column>
+                  <Table.Column>Price</Table.Column>
+                </Table.Header>
 
-            <tbody>
-              {cartItem.map((item) => (
-                <tr
-                  key={item._id}
-                  className="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  <td className="p-3 text-left">{item.productName}</td>
-                  <td className="p-3 text-center">{item.quantity}</td>
-                  <td className="p-3 text-right">
-                    ৳{Number(item.productPrice) * Number(item.quantity)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 dark:border-gray-700 font-semibold">
-                <td colSpan={2} className="p-3 text-left">
-                  Subtotal
-                </td>
-                <td className="p-3 text-right">
-                  ৳
-                  {cartItem.reduce(
-                    (total, item) =>
-                      total + Number(item.productPrice) * Number(item.quantity),
-                    0,
-                  )}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+                <Table.Body>
+                  {cartItem.map((item) => (
+                    <Table.Row key={item._id}>
+                      <Table.Cell>{item.productName}</Table.Cell>
+
+                      <Table.Cell>
+                        <div className="flex items-center justify-center gap-3">
+                          <button
+                            type="button"
+                            disabled={
+                              Number(item.quantity) <= 1 ||
+                              updatingId === item._id
+                            }
+                            onClick={() =>
+                              handleQuantityChange(item, "decrease")
+                            }
+                            className="border rounded-md px-2 py-1 disabled:opacity-40"
+                          >
+                            -
+                          </button>
+
+                          <span className="min-w-5 text-center">
+                            {item.quantity}
+                          </span>
+
+                          <button
+                            type="button"
+                            disabled={updatingId === item._id}
+                            onClick={() =>
+                              handleQuantityChange(item, "increase")
+                            }
+                            className="border rounded-md px-2 py-1 disabled:opacity-40"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </Table.Cell>
+
+                      <Table.Cell>
+                        <div className="text-right">
+                          ৳{Number(item.productPrice) * Number(item.quantity)}
+                        </div>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Content>
+            </Table.ScrollContainer>
+          </Table>
+
+          {/* Subtotal */}
+          <div className="flex justify-between items-center border-t-2 mt-3 pt-4 px-3 font-semibold">
+            <span>Subtotal</span>
+            <span>৳{subtotal}</span>
+          </div>
         </div>
       )}
     </div>
