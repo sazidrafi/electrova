@@ -16,11 +16,13 @@ import { Check } from "@gravity-ui/icons";
 import { toast } from "@heroui/react";
 import { FaGoogle } from "react-icons/fa";
 import Link from "next/link";
-import { signIn } from "../lib/auth-client";
+import { authClient, signIn } from "../lib/auth-client";
 import { useRouter } from "next/navigation";
+
 
 const SignInPage = () => {
   const router = useRouter();
+  const { refetch } = authClient.useSession();
   const onSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -38,13 +40,12 @@ const SignInPage = () => {
         });
         return;
       }
-
       // console.log("Signin data:", data);
-
+      await refetch();
       toast.success("Success!", {
         description: `Welcome Back`,
       });
-      router.push("/");
+      router.replace("/");
     } catch (error) {
       toast.danger("Something went wrong!", {
         description: error.message || "Please try again.",
@@ -127,7 +128,17 @@ const SignInPage = () => {
         </div>
 
         <div className="mx-auto text-center max-w-lg">
-          <Button variant="tertiary" className="w-full" size="lg">
+          <Button
+            variant="tertiary"
+            className="w-full"
+            size="lg"
+            onPress={() =>
+              authClient.signIn.social({
+                provider: "google",
+                callbackURL: "/",
+              })
+            }
+          >
             Log in with Google <FaGoogle />
           </Button>
         </div>
