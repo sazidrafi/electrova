@@ -3,6 +3,7 @@
 import { Button, Input, Table } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { authClient } from "../lib/auth-client";
+import CheckoutForm from "@/Components/CheckoutForm";
 
 const CartPage = () => {
   const [cart, setCart] = useState([]);
@@ -12,6 +13,7 @@ const CartPage = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponMessage, setCouponMessage] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
 
   const { data, isPending } = authClient.useSession();
   const userid = data?.user?.id;
@@ -111,9 +113,7 @@ const CartPage = () => {
     );
   }
 
-  const discount = appliedCoupon
-    ? (subtotal * appliedCoupon) / 100
-    : 0;
+  const discount = appliedCoupon ? (subtotal * appliedCoupon) / 100 : 0;
 
   const total = subtotal - discount;
 
@@ -146,14 +146,13 @@ const CartPage = () => {
       console.error("Coupon verification error:", error);
       setAppliedCoupon(null);
       setCouponMessage("Something went wrong");
-    }
-    finally {
+    } finally {
       setIsVerifying(false);
     }
   };
 
   return (
-    <div className="container mx-auto mt-6 sm:mt-10 mb-10 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto mt-6 sm:mt-10 mb-10 px-4 sm:px-6 lg:px-8 min-h-120">
       <div className="flex flex-col lg:flex-row justify-between gap-6 lg:gap-8">
         {/* Cart Section */}
         <div className="w-full min-w-0 flex-1">
@@ -168,111 +167,132 @@ const CartPage = () => {
           <div className="border-b-2 border-gray-200 dark:border-gray-700 mt-5 mb-5" />
 
           {cart.length === 0 ? (
-            <p className="text-gray-500 py-5">Your cart is empty.</p>
+            orderPlaced ? (
+              <p className="text-green-600 py-5">
+                Your order has been placed successfully! Thank you for shopping
+                with us.
+              </p>
+            ) : (
+              <p className="text-gray-500 py-5">Your cart is empty.</p>
+            )
           ) : (
-            <div className="overflow-x-auto">
-              <div className="min-w-150">
-                <Table>
-                  <Table.ScrollContainer>
-                    <Table.Content
-                      aria-label="Cart items"
-                      className="min-w-150"
-                    >
-                      <Table.Header>
-                        <Table.Column isRowHeader>Product</Table.Column>
+            <>
+              <div className="overflow-x-auto">
+                <div className="min-w-150">
+                  <Table>
+                    <Table.ScrollContainer>
+                      <Table.Content
+                        aria-label="Cart items"
+                        className="min-w-150"
+                      >
+                        <Table.Header>
+                          <Table.Column isRowHeader>Product</Table.Column>
 
-                        <Table.Column>
-                          <div className="text-right">Price</div>
-                        </Table.Column>
+                          <Table.Column>
+                            <div className="text-right">Price</div>
+                          </Table.Column>
 
-                        <Table.Column>
-                          <div className="text-center">Quantity</div>
-                        </Table.Column>
+                          <Table.Column>
+                            <div className="text-center">Quantity</div>
+                          </Table.Column>
 
-                        <Table.Column>
-                          <div className="text-right">Subtotal</div>
-                        </Table.Column>
-                      </Table.Header>
+                          <Table.Column>
+                            <div className="text-right">Subtotal</div>
+                          </Table.Column>
+                        </Table.Header>
 
-                      <Table.Body>
-                        {cart.map((item) => (
-                          <Table.Row key={item._id}>
-                            <Table.Cell>{item.productName}</Table.Cell>
+                        <Table.Body>
+                          {cart.map((item) => (
+                            <Table.Row key={item._id}>
+                              <Table.Cell>{item.productName}</Table.Cell>
 
-                            <Table.Cell>
-                              <div className="text-right">
-                                ৳{item.productPrice}
-                              </div>
-                            </Table.Cell>
+                              <Table.Cell>
+                                <div className="text-right">
+                                  ৳{item.productPrice}
+                                </div>
+                              </Table.Cell>
 
-                            <Table.Cell>
-                              <div className="flex items-center justify-center gap-3">
-                                <button
-                                  type="button"
-                                  disabled={
-                                    Number(item.quantity) <= 1 ||
-                                    updatingId === item._id
-                                  }
-                                  onClick={() =>
-                                    handleQuantityChange(item, "decrease")
-                                  }
-                                  className="border rounded-md px-2 py-1 disabled:opacity-40"
-                                >
-                                  -
-                                </button>
+                              <Table.Cell>
+                                <div className="flex items-center justify-center gap-3">
+                                  <button
+                                    type="button"
+                                    disabled={
+                                      Number(item.quantity) <= 1 ||
+                                      updatingId === item._id
+                                    }
+                                    onClick={() =>
+                                      handleQuantityChange(item, "decrease")
+                                    }
+                                    className="border rounded-md px-2 py-1 disabled:opacity-40"
+                                  >
+                                    -
+                                  </button>
 
-                                <span className="min-w-5 text-center">
-                                  {item.quantity}
-                                </span>
+                                  <span className="min-w-5 text-center">
+                                    {item.quantity}
+                                  </span>
 
-                                <button
-                                  type="button"
-                                  disabled={updatingId === item._id}
-                                  onClick={() =>
-                                    handleQuantityChange(item, "increase")
-                                  }
-                                  className="border rounded-md px-2 py-1 disabled:opacity-40"
-                                >
-                                  +
-                                </button>
-                              </div>
-                            </Table.Cell>
-                            <Table.Cell>
-                              <div className="text-right">
-                                ৳
-                                {Number(item.productPrice) *
-                                  Number(item.quantity)}
-                              </div>
-                            </Table.Cell>
-                          </Table.Row>
-                        ))}
-                      </Table.Body>
-                    </Table.Content>
-                  </Table.ScrollContainer>
-                </Table>
+                                  <button
+                                    type="button"
+                                    disabled={updatingId === item._id}
+                                    onClick={() =>
+                                      handleQuantityChange(item, "increase")
+                                    }
+                                    className="border rounded-md px-2 py-1 disabled:opacity-40"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </Table.Cell>
+                              <Table.Cell>
+                                <div className="text-right">
+                                  ৳
+                                  {Number(item.productPrice) *
+                                    Number(item.quantity)}
+                                </div>
+                              </Table.Cell>
+                            </Table.Row>
+                          ))}
+                        </Table.Body>
+                      </Table.Content>
+                    </Table.ScrollContainer>
+                  </Table>
 
-                <div className="border-t-2 mt-3 pt-4 px-3 space-y-3">
-                  <div className="flex justify-between font-semibold">
-                    <span>Subtotal</span>
-                    <span>৳{subtotal.toFixed(2)}</span>
-                  </div>
-
-                  {appliedCoupon && (
-                    <div className="flex justify-between text-green-600">
-                      <span>
-                        Discount ({appliedCoupon}%)
-                      </span>
-                      <span>-৳{discount.toFixed(2)}</span>
+                  <div className="border-t-2 mt-3 pt-4 px-3 space-y-3">
+                    <div className="flex justify-between font-semibold">
+                      <span>Subtotal</span>
+                      <span>৳{subtotal.toFixed(2)}</span>
                     </div>
-                  )}
 
-                  <div className="flex justify-between font-bold text-lg border-t pt-3">
-                    <span>Total</span>
-                    <span>৳{total.toFixed(2)}</span>
+                    {appliedCoupon && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Discount ({appliedCoupon}%)</span>
+                        <span>-৳{discount.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between font-bold text-lg border-t pt-3">
+                      <span>Total</span>
+                      <span>৳{total.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+                </div>
+
+              <CheckoutForm
+      userId={userid}
+      user={data?.user}
+      cart={cart}
+      total={total}
+      discount={discount}
+      subtotal={subtotal}
+      couponCode={appliedCoupon ? coupon.trim() : null}
+      onSuccess={() => {
+        setCart([]);
+        setOrderPlaced(true);
+      }}
+    />
+            </>
           )}
         </div>
 
@@ -326,10 +346,7 @@ const CartPage = () => {
         </div>
       </div>
 
-
-
       {/* User information section */}
-      
     </div>
   );
 };
