@@ -4,17 +4,43 @@ import { CircleDollar } from "@gravity-ui/icons";
 import { Avatar, Button, Card } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaStar } from "react-icons/fa";
+import { authClient } from "@/app/lib/auth-client";
+
 
 const ProductCard = ({ item }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams();const { data, isPending, error, refetch } = authClient?.useSession();
 
-  const { _id, title, description, ratings, currentPrice, images } = item;
+  const { _id, title, description, ratings, currentPrice, images,discountedPrice } = item;
 
   const handleClick = () => {
     const query = searchParams.toString();
 
     router.push(`/products/${_id}${query ? `?${query}` : ""}`);
+  };
+  
+  let userId;
+  {
+    data?.user?.id ? (userId = data?.user?.id) : "";
+  }
+  const handleAddToCart = async () => {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/products/cart`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId,
+          productId: _id,
+          quantity: 1,
+          productName: title,
+          productPrice: discountedPrice,
+        }),
+      },
+    );
+    router.push('/checkout')
   };
 
   return (
@@ -27,7 +53,7 @@ const ProductCard = ({ item }) => {
       </Card.Header>
 
       <Card.Content className="mt-1 gap-2">
-        <p className="text-xl leading-4 font-medium truncate">{title}</p>
+        <p className="text-xl leading-4 font-medium truncate p-3">{title}</p>
         <p className="text-sm text-muted truncate">{description}</p>
 
         <div className="flex gap-2 items-center">
@@ -40,7 +66,7 @@ const ProductCard = ({ item }) => {
             <CircleDollar className="w-6 h-6" />
             {currentPrice}
           </p>
-          <Button variant="outline">Buy Now</Button>
+          <Button onClick={handleAddToCart} variant="outline">Buy Now</Button>
         </div>
       </Card.Content>
     </Card>

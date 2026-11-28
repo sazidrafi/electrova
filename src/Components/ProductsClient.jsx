@@ -34,7 +34,7 @@ const ProductsClient = ({ categories, products }) => {
           variant="outline"
           className={
             selectedCategory === "All"
-              ? "bg-green-700 text-white border-green-700 hover:bg-green-800"
+              ? "bg-blue-700 text-white border-blue-700 hover:bg-blue-800"
               : ""
           }
           onPress={() => handleCategoryClick("All")}
@@ -48,7 +48,7 @@ const ProductsClient = ({ categories, products }) => {
             variant="outline"
             className={
               selectedCategory === category._id
-                ? "bg-green-700 text-white border-green-700 hover:bg-green-800"
+                ? "bg-blue-700 text-white border-blue-700 hover:bg-blue-800"
                 : ""
             }
             onPress={() => handleCategoryClick(category._id)}
